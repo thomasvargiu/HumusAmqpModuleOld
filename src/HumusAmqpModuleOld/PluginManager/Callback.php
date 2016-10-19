@@ -13,35 +13,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license
+ * and is licensed under the MIT license.
  */
 
-use HumusAmqpModuleOldTest\ServiceManagerTestCase;
+namespace HumusAmqpModuleOld\PluginManager;
 
-ini_set('error_reporting', E_ALL);
+use HumusAmqpModuleOld\Exception;
+use Zend\ServiceManager\AbstractPluginManager;
 
-$files = array(__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php');
+class Callback extends AbstractPluginManager
+{
+    /**
+     * Validate the plugin
+     *
+     * Checks that the filter loaded is either a valid callback or an instance
+     * of FilterInterface.
+     *
+     * @param  mixed $plugin
+     * @return void
+     * @throws Exception\RuntimeException if invalid
+     */
+    public function validatePlugin($plugin)
+    {
+        if (is_callable($plugin)) {
+            // we're okay
+            return;
+        }
 
-foreach ($files as $file) {
-    if (file_exists($file)) {
-        $loader = require $file;
-
-        break;
+        throw new Exception\RuntimeException(sprintf(
+            'Plugin of type %s is invalid; must be a callable',
+            (is_object($plugin) ? get_class($plugin) : gettype($plugin))
+        ));
     }
 }
-
-if (! isset($loader)) {
-    throw new RuntimeException('vendor/autoload.php could not be found. Did you run `php composer.phar install`?');
-}
-
-/* @var $loader \Composer\Autoload\ClassLoader */
-$loader->add('HumusAmqpModuleOldTest\\', __DIR__);
-
-if (file_exists(__DIR__ . '/TestConfiguration.php')) {
-    $config = require __DIR__ . '/TestConfiguration.php';
-} else {
-    $config = require __DIR__ . '/TestConfiguration.php.dist';
-}
-
-ServiceManagerTestCase::setConfiguration($config);
-unset($files, $file, $loader, $config);

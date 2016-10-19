@@ -16,7 +16,7 @@
  * and is licensed under the MIT license.
  */
 
-namespace HumusAmqpModule;
+namespace HumusAmqpModuleOld;
 
 return array(
     'routes' => array(

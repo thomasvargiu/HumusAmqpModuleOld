@@ -13,35 +13,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license
+ * and is licensed under the MIT license.
  */
 
-use HumusAmqpModuleOldTest\ServiceManagerTestCase;
+namespace HumusAmqpModuleOld;
 
-ini_set('error_reporting', E_ALL);
+interface ProducerInterface
+{
+    /**
+     * @param string $body
+     * @param string $routingKey
+     * @param array|\Traversable|MessageAttributes|null $attributes
+     */
+    public function publish($body, $routingKey = '', $attributes = null);
 
-$files = array(__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php');
-
-foreach ($files as $file) {
-    if (file_exists($file)) {
-        $loader = require $file;
-
-        break;
-    }
+    /**
+     * @param array $bodies
+     * @param string $routingKey
+     * @param array|\Traversable|MessageAttributes|null $attributes
+     */
+    public function publishBatch(array $bodies, $routingKey = '', $attributes = null);
 }
-
-if (! isset($loader)) {
-    throw new RuntimeException('vendor/autoload.php could not be found. Did you run `php composer.phar install`?');
-}
-
-/* @var $loader \Composer\Autoload\ClassLoader */
-$loader->add('HumusAmqpModuleOldTest\\', __DIR__);
-
-if (file_exists(__DIR__ . '/TestConfiguration.php')) {
-    $config = require __DIR__ . '/TestConfiguration.php';
-} else {
-    $config = require __DIR__ . '/TestConfiguration.php.dist';
-}
-
-ServiceManagerTestCase::setConfiguration($config);
-unset($files, $file, $loader, $config);

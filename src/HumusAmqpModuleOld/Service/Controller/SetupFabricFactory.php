@@ -13,35 +13,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software consists of voluntary contributions made by many individuals
- * and is licensed under the MIT license
+ * and is licensed under the MIT license.
  */
 
-use HumusAmqpModuleOldTest\ServiceManagerTestCase;
+namespace HumusAmqpModuleOld\Service\Controller;
 
-ini_set('error_reporting', E_ALL);
+use HumusAmqpModuleOld\Controller\SetupFabricController;
+use Zend\ServiceManager\FactoryInterface;
+use Zend\ServiceManager\ServiceLocatorInterface;
 
-$files = array(__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php');
+class SetupFabricFactory implements FactoryInterface
+{
+    /**
+     * Create service
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     * @return mixed
+     */
+    public function createService(ServiceLocatorInterface $serviceLocator)
+    {
+        $sm = $serviceLocator->getServiceLocator();
 
-foreach ($files as $file) {
-    if (file_exists($file)) {
-        $loader = require $file;
+        $config = $sm->get('Config')['humus_amqp_module'];
 
-        break;
+        $controller  = new SetupFabricController();
+        $controller->setConnectionManager($sm->get('HumusAmqpModuleOld\PluginManager\Connection'));
+        $controller->setConfig($config);
+
+        return $controller;
     }
 }
-
-if (! isset($loader)) {
-    throw new RuntimeException('vendor/autoload.php could not be found. Did you run `php composer.phar install`?');
-}
-
-/* @var $loader \Composer\Autoload\ClassLoader */
-$loader->add('HumusAmqpModuleOldTest\\', __DIR__);
-
-if (file_exists(__DIR__ . '/TestConfiguration.php')) {
-    $config = require __DIR__ . '/TestConfiguration.php';
-} else {
-    $config = require __DIR__ . '/TestConfiguration.php.dist';
-}
-
-ServiceManagerTestCase::setConfiguration($config);
-unset($files, $file, $loader, $config);
